@@ -23,7 +23,7 @@ public class Hit {
     @Column(nullable = false)
     private String uri;
 
-    @Column(nullable = false, length = 15)
+    @Column(nullable = false, length = 40)
     private String ip;
 
     @Column(nullable = false)
