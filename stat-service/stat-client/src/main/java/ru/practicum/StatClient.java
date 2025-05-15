@@ -12,11 +12,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-@Component
 public class StatClient {
-    @Autowired
-    private RestTemplate rest;
+    private final RestTemplate rest;
 
+    public StatClient() {
+        this.rest = new RestTemplate();
+    }
 
     public void addHit(HitDto hitDto) {
         HttpEntity<HitDto> requestEntity = new HttpEntity<>(hitDto);
