@@ -1,4 +1,12 @@
 package ru.practicum.model;
 
-public record Stat(String app, String uri, Integer hits) {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+public class Stat {
+    private final String app;
+    private final String uri;
+    private final Long hits;
 }

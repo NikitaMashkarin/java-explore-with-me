@@ -11,9 +11,9 @@ public class StatMapper {
         }
 
         return new StatDto(
-                stat.app(),
-                stat.uri(),
-                stat.hits()
+                stat.getApp(),
+                stat.getUri(),
+                stat.getHits()
         );
     }
 
