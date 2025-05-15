@@ -1,6 +1,5 @@
 package ru.practicum.service;
 
-import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.HitDto;
 import ru.practicum.StatDto;
 

@@ -27,9 +27,9 @@ public class StatsController {
     @GetMapping("/stats")
     @ResponseStatus(HttpStatus.OK)
     public List<StatDto> getStatistics(@RequestParam String start,
-                                      @RequestParam String end,
-                                      @RequestParam(required = false) String[] uris,
-                                      @RequestParam(defaultValue = "false") boolean unique) {
+                                       @RequestParam String end,
+                                       @RequestParam(required = false) String[] uris,
+                                       @RequestParam(defaultValue = "false") boolean unique) {
         log.info("GET /stats begun");
         return statService.getStatistics(start, end, uris, unique);
     }
