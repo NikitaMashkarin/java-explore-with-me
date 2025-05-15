@@ -6,12 +6,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class HitDto {
-    String app;
-    String uri;
-    String ip;
-    String timestamp;
+    private String app;
+    private String uri;
+    private String ip;
+    private String timestamp;
 }

@@ -1,49 +1,50 @@
 package ru.practicum.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.HitDto;
 import ru.practicum.StatDto;
 import ru.practicum.mapper.StatMapper;
+import ru.practicum.model.Stat;
 import ru.practicum.repository.StatRepository;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.mapper.HitMapper.toHitEntity;
+import static ru.practicum.mapper.HitMapper.toHit;
 
-@Slf4j
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class StatServiceImpl implements StatService {
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private StatRepository statRepository;
+    private final StatRepository statRepository;
 
     @Override
     public void addHit(HitDto hitDto) {
-        statRepository.save(toHitEntity(hitDto));
+        log.debug("Сохраняем hit: {}", hitDto);
+        statRepository.save(toHit(hitDto));
     }
 
     @Override
-    public List<StatDto> getStatistics(String start, String end, String[] uris, boolean unique) {
-        LocalDateTime startDataTime = LocalDateTime.parse(start, FORMATTER);
-        LocalDateTime endDataTime = LocalDateTime.parse(end, FORMATTER);
+    public List<StatDto> getStats(LocalDateTime start, LocalDateTime end, String[] uris, boolean unique) {
+        List<Stat> stats;
 
-        if (uris.length == 0) {
-            if (unique) return statRepository.findAllUrisUnique(startDataTime, endDataTime).stream()
-                    .map(StatMapper::toStatDto)
-                    .collect(Collectors.toList());
-            else return statRepository.findAllUris(startDataTime, endDataTime).stream()
-                    .map(StatMapper::toStatDto)
-                    .collect(Collectors.toList());
+        if (uris == null || uris.length == 0) {
+            stats = unique
+                    ? statRepository.findAllStatsUnique(start, end)
+                    : statRepository.findAllStats(start, end);
         } else {
-            if (unique) return statRepository.findByUrisUnique(List.of(uris), startDataTime, endDataTime).stream()
-                    .map(StatMapper::toStatDto)
-                    .collect(Collectors.toList());
-            else return statRepository.findByUris(List.of(uris), startDataTime, endDataTime).stream()
-                    .map(StatMapper::toStatDto)
-                    .collect(Collectors.toList());
+            List<String> uriList = List.of(uris);
+            stats = unique
+                    ? statRepository.findStatsByUrisUnique(uriList, start, end)
+                    : statRepository.findStatsByUris(uriList, start, end);
         }
+
+        return stats.isEmpty()
+                ? Collections.emptyList()
+                : stats.stream().map(StatMapper::toStatDto).collect(Collectors.toList());
     }
 }

@@ -1,31 +1,18 @@
 package ru.practicum.mapper;
 
-import ru.practicum.model.Stat;
 import ru.practicum.StatDto;
+import ru.practicum.model.Stat;
 
 public class StatMapper {
+    private StatMapper() {
 
-    public static StatDto toStatDto(Stat stat) {
-        if (stat == null) {
-            return null;
-        }
-
-        return new StatDto(
-                stat.getApp(),
-                stat.getUri(),
-                stat.getHits()
-        );
     }
 
-    public static Stat toStatEntity(StatDto statDto) {
-        if (statDto == null) {
-            return null;
-        }
-
-        return new Stat(
-                statDto.getApp(),
-                statDto.getUri(),
-                statDto.getHits()
-        );
+    public static StatDto toStatDto(Stat stat) {
+        return StatDto.builder()
+                .app(stat.getApp())
+                .uri(stat.getUri())
+                .hits(stat.getHits())
+                .build();
     }
 }
