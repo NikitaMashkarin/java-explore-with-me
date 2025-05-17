@@ -2,14 +2,13 @@ package ru.practicum.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.Hibernate;
+import org.hibernate.proxy.HibernateProxy;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Getter
 @Setter
-@ToString
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -36,13 +35,31 @@ public class Hit {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        if (o == null || getClassWithoutProxy(this) != getClassWithoutProxy(o)) return false;
         Hit hit = (Hit) o;
-        return id != null && Objects.equals(id, hit.id);
+        return id != null && id.equals(hit.id);
     }
 
     @Override
     public int hashCode() {
-        return getClass().hashCode();
+        return getClassWithoutProxy(this).hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "Hit{" +
+                "id=" + id +
+                ", app='" + app + '\'' +
+                ", uri='" + uri + '\'' +
+                ", ip='" + ip + '\'' +
+                ", timestamp=" + timestamp +
+                '}';
+    }
+
+    private Class<?> getClassWithoutProxy(Object entity) {
+        if (entity instanceof HibernateProxy) {
+            return ((HibernateProxy) entity).getHibernateLazyInitializer().getPersistentClass();
+        }
+        return entity.getClass();
     }
 }
