@@ -1,56 +1,54 @@
 package ru.practicum.compilations.service;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.compilations.dto.CompilationDto;
+import ru.practicum.compilations.mapper.CompilationMapper;
 import ru.practicum.compilations.dto.NewCompilationDto;
 import ru.practicum.compilations.dto.UpdateCompilationRequestDto;
-import ru.practicum.compilations.mapper.CompilationMapper;
 import ru.practicum.compilations.model.Compilation;
 import ru.practicum.compilations.repository.CompilationRepository;
-import org.springframework.data.domain.PageRequest;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exceptions.CompilationNotFoundException;
 import ru.practicum.exceptions.ValidationRequestException;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ru.practicum.compilations.mapper.CompilationMapper.toCompilation;
 import static ru.practicum.compilations.mapper.CompilationMapper.toCompilationDto;
 
 @Service
+@RequiredArgsConstructor
 public class CompilationServiceImpl implements CompilationService {
-    private CompilationRepository compilationRepository;
-    private EventRepository eventRepository;
+    private final CompilationRepository compilationRepository;
+    private final EventRepository eventRepository;
 
     @Override
-    public List<CompilationDto> getCompilations(Boolean pinned, Integer from, Integer size) {
+    public List<CompilationDto> getCompilations(Boolean pinned, int from, int size) {
         List<Compilation> compilations;
-
-        compilations = compilationRepository.findByPinned(pinned, PageRequest.of(from / size, size));
-
-        return compilations.isEmpty()
-                ? List.of()
-                : compilations
-                .stream()
+        if (pinned != null) {
+            compilations = compilationRepository.findByPinned(pinned, PageRequest.of(from / size, size));
+        } else {
+            compilations = compilationRepository.findAll(PageRequest.of(from / size, size)).getContent();
+        }
+        return !compilations.isEmpty() ? compilations.stream()
                 .map(CompilationMapper::toCompilationDto)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()) : Collections.emptyList();
     }
 
     @Override
-    public CompilationDto getCompilationById(Long comId) {
-        Optional<Compilation> compilationOptional = compilationRepository.findById(comId);
-
-        if (compilationOptional.isEmpty()) throw new CompilationNotFoundException(comId);
-
-        return toCompilationDto(compilationOptional.get());
+    public CompilationDto getCompilationById(Long compId) {
+        return toCompilationDto(compilationRepository.findById(compId)
+                .orElseThrow(() -> new CompilationNotFoundException(compId)));
     }
 
     @Override
     @Transactional
-    public CompilationDto addCompilation(NewCompilationDto newCompilationDto) {
+    public CompilationDto createCompilation(NewCompilationDto newCompilationDto) {
         Compilation compilation = toCompilation(newCompilationDto);
         if (newCompilationDto.getEvents() != null) {
             compilation.setEvents(eventRepository.findByIdIn(newCompilationDto.getEvents()));

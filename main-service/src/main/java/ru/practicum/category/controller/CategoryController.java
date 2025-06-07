@@ -1,8 +1,7 @@
 package ru.practicum.category.controller;
 
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.category.dto.CategoryDto;
@@ -13,41 +12,38 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@Slf4j
+@RequestMapping
 public class CategoryController {
-    private CategoryService service;
 
-    @PostMapping("/admin/categories")
-    @ResponseStatus(HttpStatus.CREATED)
-    public CategoryDto addCategory(@RequestBody NewCategoryDto newCategoryDto) {
-        log.info("POST /admin/categories Category {}", newCategoryDto);
-        return service.addCategory(newCategoryDto);
-    }
-
-    @DeleteMapping("/admin/categories/{catId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCategory(@PathVariable @Positive Long catId) {
-        log.info("DELETE /admin/categories/{}", catId);
-        service.deleteCategory(catId);
-    }
-
-    @PatchMapping("/admin/categories/{catId}")
-    public CategoryDto updateCategory(@PathVariable @Positive Long catId,
-                                      @RequestBody NewCategoryDto newCategoryDto) {
-        log.info("PATCH /admin/categories/{}", catId);
-        return service.updateCategory(catId, newCategoryDto);
-    }
+    private final CategoryService categoryService;
 
     @GetMapping("/categories")
-    public List<CategoryDto> getCategory(@RequestParam(defaultValue = "0") Integer from,
-                                         @RequestParam(defaultValue = "10") Integer size) {
-        log.info("GET /categories");
-        return service.getCategory(from, size);
+    public List<CategoryDto> getCategories(@RequestParam(defaultValue = "0") int from,
+                                           @RequestParam(defaultValue = "10") int size) {
+        return categoryService.getCategories(from, size);
     }
 
     @GetMapping("/categories/{catId}")
     public CategoryDto getCategoryById(@PathVariable Long catId) {
-        log.info("GET /categories/{}", catId);
-        return service.getCategoryById(catId);
+        return categoryService.getCategoryById(catId);
+    }
+
+    @PostMapping("/admin/categories")
+    @ResponseStatus(HttpStatus.CREATED)
+    public CategoryDto createCategory(@RequestBody @Valid NewCategoryDto newCategoryDto) {
+        return categoryService.createCategory(newCategoryDto);
+    }
+
+    @PatchMapping("/admin/categories/{catId}")
+    @ResponseStatus(HttpStatus.OK)
+    public CategoryDto updateCategory(@PathVariable Long catId,
+                                      @RequestBody @Valid NewCategoryDto newCategoryDto) {
+        return categoryService.updateCategory(catId, newCategoryDto);
+    }
+
+    @DeleteMapping("/admin/categories/{catId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCategory(@PathVariable Long catId) {
+        categoryService.deleteCategory(catId);
     }
 }

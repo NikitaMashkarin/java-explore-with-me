@@ -1,13 +1,13 @@
 package ru.practicum.request.service;
 
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.EventState;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exceptions.EventNotFoundException;
 import ru.practicum.exceptions.ForbiddenException;
-import ru.practicum.exceptions.RequestNotFoundException;
 import ru.practicum.exceptions.UserNotFoundException;
 import ru.practicum.request.dto.EventRequestStatusUpdateRequestDto;
 import ru.practicum.request.dto.EventRequestStatusUpdateResultDto;
@@ -27,13 +27,77 @@ import java.util.stream.Collectors;
 import static ru.practicum.request.mapper.RequestMapper.toRequestDto;
 
 @Service
+@RequiredArgsConstructor
+@Transactional
 public class RequestServiceImpl implements RequestService {
-    private RequestRepository requestRepository;
-    private EventRepository eventRepository;
-    private UserRepository userRepository;
+
+    private final RequestRepository requestRepository;
+    private final UserRepository userRepository;
+    private final EventRepository eventRepository;
 
     @Override
-    public List<RequestDto> getRequestByUserIdAndEventId(Long userId, Long eventId) {
+    public RequestDto createParticipationRequest(Long userId, Long eventId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventNotFoundException(eventId));
+
+        if (requestRepository.findByRequesterIdAndEventId(userId, eventId) != null) {
+            throw new ForbiddenException("Пользователь уже подал заявку на это событие.");
+        }
+        if (event.getInitiator().getId().equals(userId)) {
+            throw new ForbiddenException("Инициатор не может подавать заявку на своё событие.");
+        }
+        if (event.getState() != EventState.PUBLISHED) {
+            throw new ForbiddenException("Нельзя участвовать в неопубликованном событии.");
+        }
+        if (event.getParticipantLimit() != 0 &&
+                requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED) >= event.getParticipantLimit()) {
+            throw new ForbiddenException("Достигнут лимит участников.");
+        }
+
+        RequestStatus status = (!event.isRequestModeration() || event.getParticipantLimit() == 0)
+                ? RequestStatus.CONFIRMED : RequestStatus.PENDING;
+
+        Request request = Request.builder()
+                .event(event)
+                .requester(user)
+                .created(LocalDateTime.now())
+                .status(status)
+                .build();
+
+        return toRequestDto(requestRepository.save(request));
+    }
+
+    @Override
+    public RequestDto cancelParticipationRequest(Long userId, Long requestId) {
+
+        userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+        Request request = requestRepository.findById(requestId)
+                .orElseThrow(() -> new ForbiddenException("Запрос не найден."));
+
+        if (!request.getRequester().getId().equals(userId)) {
+            throw new ForbiddenException("Можно отменить только собственный запрос.");
+        }
+
+        request.setStatus(RequestStatus.CANCELED);
+        return toRequestDto(requestRepository.save(request));
+    }
+
+    @Override
+    public List<RequestDto> getParticipationRequests(Long userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        return requestRepository.findByRequesterId(userId).stream()
+                .map(RequestMapper::toRequestDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<RequestDto> getParticipationRequestsForUserEvent(Long userId, Long eventId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
         List<Event> events = eventRepository.findByIdAndInitiatorId(eventId, userId);
@@ -47,9 +111,8 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    @Transactional
-    public EventRequestStatusUpdateResultDto updateRequest(Long userId, Long eventId,
-                                                           EventRequestStatusUpdateRequestDto dto) {
+    public EventRequestStatusUpdateResultDto changeParticipationRequestsStatus(Long userId, Long eventId,
+                                                                               EventRequestStatusUpdateRequestDto dto) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
         Event event = eventRepository.findById(eventId)
@@ -110,67 +173,5 @@ public class RequestServiceImpl implements RequestService {
         }
 
         return result;
-    }
-
-    @Override
-    public List<RequestDto> getRequests(Long userId) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-
-        return requestRepository.findByRequesterId(userId).stream()
-                .map(RequestMapper::toRequestDto)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional
-    public RequestDto addRequest(Long userId, Long eventId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new EventNotFoundException(eventId));
-
-        if (requestRepository.findByRequesterIdAndEventId(userId, eventId).isPresent())
-            throw new ForbiddenException("Пользователь уже отправлял запрос");
-
-        if (event.getInitiator() == user)
-            throw new ForbiddenException("Инициатор не может отправить запрос на участие");
-
-        if (event.getState() != EventState.PUBLISHED) throw new ForbiddenException("Событие не опубликовано");
-
-        if (event.getParticipantLimit() != 0 &&
-                requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED) >= event.getParticipantLimit()) {
-            throw new ForbiddenException("Достигнут лимит участников.");
-        }
-
-        RequestStatus status = (!event.isRequestModeration() || event.getParticipantLimit() == 0)
-                ? RequestStatus.CONFIRMED : RequestStatus.PENDING;
-
-        Request request = Request.builder()
-                .event(event)
-                .requester(user)
-                .created(LocalDateTime.now())
-                .status(status)
-                .build();
-
-        return toRequestDto(requestRepository.save(request));
-    }
-
-    @Override
-    @Transactional
-    public RequestDto deleteRequest(Long userId, Long requestId) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-
-        Request request = requestRepository.findById(requestId)
-                .orElseThrow(() -> new RequestNotFoundException(requestId));
-
-        if (!request.getRequester().getId().equals(requestId))
-            throw new ForbiddenException("Пользователь может удалить только свой запрос");
-
-        requestRepository.delete(request);
-
-        return toRequestDto(request);
     }
 }

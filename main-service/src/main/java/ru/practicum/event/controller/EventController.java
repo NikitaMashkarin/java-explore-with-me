@@ -1,75 +1,86 @@
 package ru.practicum.event.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.event.dto.EventFullDto;
-import ru.practicum.event.dto.EventShortDto;
+import ru.practicum.event.dto.*;
+import ru.practicum.event.service.EventService;
 
 import java.util.List;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import ru.practicum.event.dto.NewEventDto;
-import ru.practicum.event.dto.UpdateEventUserRequestDto;
-import ru.practicum.event.service.EventService;
-
 @RestController
 @RequiredArgsConstructor
-@Slf4j
+@RequestMapping
 public class EventController {
-    private EventService service;
 
-    @GetMapping("/users/{userId}/events")
-    public List<EventShortDto> getEventsByUserId(@PathVariable @Positive Long userId,
-                                                 @RequestParam(defaultValue = "0") Integer from,
-                                                 @RequestParam(defaultValue = "10") Integer size) {
-        log.info("GET /users/{}/events", userId);
-        return service.getEventsByUserId(userId, from, size);
-    }
+    private final EventService eventService;
 
     @PostMapping("/users/{userId}/events")
     @ResponseStatus(HttpStatus.CREATED)
-    public EventFullDto addEvent(@PathVariable @Positive Long userId,
-                                 @RequestBody NewEventDto newEventDto) {
-        log.info("POST /users/{}/events", userId);
-        return service.addEvent(userId, newEventDto);
+    public EventFullDto createEvent(@PathVariable @Positive Long userId,
+                                    @RequestBody @Valid NewEventDto newEventDto) {
+        return eventService.createEvent(userId, newEventDto);
+    }
+
+    @GetMapping("/users/{userId}/events")
+    public List<EventShortDto> getUserEvents(@PathVariable @Positive Long userId,
+                                             @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                             @RequestParam(defaultValue = "10") @Positive int size) {
+        return eventService.getEvents(userId, from, size);
     }
 
     @GetMapping("/users/{userId}/events/{eventId}")
-    public EventFullDto getEventsByUserIdAndEventId(@PathVariable @Positive Long userId,
-                                                    @PathVariable @Positive Long eventId) {
-        log.info("GET /users/{}/events/{}", userId, eventId);
-        return service.getEventsByUserIdAndEventId(userId, eventId);
+    public EventFullDto getUserEventById(@PathVariable @Positive Long userId,
+                                         @PathVariable @Positive Long eventId) {
+        return eventService.getEventById(userId, eventId);
     }
 
     @PatchMapping("/users/{userId}/events/{eventId}")
-    public EventFullDto updateEvent(@PathVariable @Positive Long userId,
-                                    @PathVariable @Positive Long eventId,
-                                    @RequestBody UpdateEventUserRequestDto eventRequestDto) {
-        log.info("PATCH /users/{}/events/{}", userId, eventId);
-        return service.updateEvent(userId, eventId, eventRequestDto);
+    public EventFullDto updateUserEvent(@PathVariable @Positive Long userId,
+                                        @PathVariable @Positive Long eventId,
+                                        @RequestBody @Valid UpdateEventUserRequestDto updateEventUserRequestDto) {
+        return eventService.updateEventByUser(userId, eventId, updateEventUserRequestDto);
+    }
+
+    @GetMapping("/admin/events")
+    public List<EventFullDto> getAdminEvents(@RequestParam(required = false) List<Long> users,
+                                             @RequestParam(required = false) List<String> states,
+                                             @RequestParam(required = false) List<Long> categories,
+                                             @RequestParam(required = false) String rangeStart,
+                                             @RequestParam(required = false) String rangeEnd,
+                                             @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                             @RequestParam(defaultValue = "10") @Positive int size) {
+        return eventService.getEventsByAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
+    }
+
+    @PatchMapping("/admin/events/{eventId}")
+    public EventFullDto updateAdminEvent(@PathVariable @Positive Long eventId,
+                                         @RequestBody @Valid UpdateEventAdminRequestDto updateEventAdminRequestDto) {
+        return eventService.updateEventByAdmin(eventId, updateEventAdminRequestDto);
     }
 
     @GetMapping("/events")
-    public List<EventShortDto> getEvents(@RequestParam(required = false) String text,
-                                         @RequestParam(required = false) List<Long> categories,
-                                         @RequestParam(required = false) boolean paid,
-                                         @RequestParam(required = false) String rangeStart,
-                                         @RequestParam(required = false) String rangeEnd,
-                                         @RequestParam(required = false) boolean onlyAvailable,
-                                         @RequestParam(required = false) String sort,
-                                         @RequestParam(defaultValue = "0") @Positive Integer from,
-                                         @RequestParam(defaultValue = "10") @Positive Integer size,
-                                         HttpServletRequest request) {
-        log.info("GET /events");
-        return service.getEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, request);
+    public List<EventShortDto> getPublishedEvents(@RequestParam(required = false) String text,
+                                                  @RequestParam(required = false) List<Long> categories,
+                                                  @RequestParam(required = false) Boolean paid,
+                                                  @RequestParam(required = false) String rangeStart,
+                                                  @RequestParam(required = false) String rangeEnd,
+                                                  @RequestParam(defaultValue = "false") boolean onlyAvailable,
+                                                  @RequestParam(required = false) String sort,
+                                                  @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                                  @RequestParam(defaultValue = "10") @Positive int size,
+                                                  HttpServletRequest request) {
+        return eventService.getPublishedEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable,
+                sort, from, size, request);
     }
 
     @GetMapping("/events/{id}")
-    public EventFullDto getEventById(@PathVariable @Positive Long id, HttpServletRequest request) {
-        log.info("GET /events/{}", id);
-        return service.getEventById(id, request);
+    public EventFullDto getPublishedEventById(@PathVariable @Positive Long id,
+                                              HttpServletRequest request) {
+        return eventService.getPublishedEventById(id, request);
     }
 }

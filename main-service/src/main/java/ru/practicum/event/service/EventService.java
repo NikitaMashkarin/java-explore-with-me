@@ -1,27 +1,32 @@
 package ru.practicum.event.service;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.stereotype.Service;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.NewEventDto;
+import ru.practicum.event.dto.UpdateEventAdminRequestDto;
 import ru.practicum.event.dto.UpdateEventUserRequestDto;
 
 import java.util.List;
 
-@Service
 public interface EventService {
-    List<EventShortDto> getEventsByUserId(Long userId, Integer from, Integer size);
 
-    EventFullDto addEvent(Long userId, NewEventDto newEventDto);
+    EventFullDto createEvent(Long userId, NewEventDto newEventDto);
 
-    EventFullDto getEventsByUserIdAndEventId(Long userId, Long eventId);
+    List<EventShortDto> getEvents(Long userId, int from, int size);
 
-    EventFullDto updateEvent(Long userId, Long eventId, UpdateEventUserRequestDto eventRequestDto);
+    EventFullDto getEventById(Long userId, Long eventId);
 
-    List<EventShortDto> getEvents(String text, List<Long> categories, boolean paid,
-                                  String rangeStart, String rangeEnd, boolean onlyAvailable,
-                                  String sort, Integer from, Integer size, HttpServletRequest request);
+    EventFullDto updateEventByUser(Long userId, Long eventId, UpdateEventUserRequestDto updateEventUserRequestDto);
 
-    EventFullDto getEventById(Long id, HttpServletRequest request);
+    EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequestDto updateEventAdminRequestDto);
+
+    List<EventFullDto> getEventsByAdmin(List<Long> users, List<String> states, List<Long> categories,
+                                        String rangeStart, String rangeEnd, int from, int size);
+
+    List<EventShortDto> getPublishedEvents(String text, List<Long> categories, Boolean paid,
+                                           String rangeStart, String rangeEnd, boolean onlyAvailable,
+                                           String sort, int from, int size, HttpServletRequest request);
+
+    EventFullDto getPublishedEventById(Long eventId, HttpServletRequest request);
 }

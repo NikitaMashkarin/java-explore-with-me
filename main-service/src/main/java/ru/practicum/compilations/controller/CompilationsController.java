@@ -1,8 +1,8 @@
 package ru.practicum.compilations.controller;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.compilations.dto.CompilationDto;
@@ -14,42 +14,38 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@Slf4j
+@RequestMapping
 public class CompilationsController {
-    private CompilationService service;
+
+    private final CompilationService compilationService;
 
     @GetMapping("/compilations")
     public List<CompilationDto> getCompilations(@RequestParam(required = false) Boolean pinned,
-                                                @RequestParam(defaultValue = "0") Integer from,
-                                                @RequestParam(defaultValue = "10") Integer size) {
-        log.info("GET /compilations pinned {}, from {}, size {}", pinned, from, size);
-        return service.getCompilations(pinned, from, size);
+                                                @RequestParam(defaultValue = "0") int from,
+                                                @RequestParam(defaultValue = "10") int size) {
+        return compilationService.getCompilations(pinned, from, size);
     }
 
-    @GetMapping("/compilations/{comId}")
-    public CompilationDto getCompilationById(@PathVariable @Positive Long comId) {
-        log.info("GET /compilations/{}", comId);
-        return service.getCompilationById(comId);
+    @GetMapping("/compilations/{compId}")
+    public CompilationDto getCompilationById(@PathVariable @Positive Long compId) {
+        return compilationService.getCompilationById(compId);
     }
 
     @PostMapping("/admin/compilations")
     @ResponseStatus(HttpStatus.CREATED)
-    public CompilationDto addCompilation(@RequestBody NewCompilationDto newCompilationDto) {
-        log.info("POST /admin/compilations");
-        return service.addCompilation(newCompilationDto);
+    public CompilationDto createCompilation(@RequestBody @Valid NewCompilationDto newCompilationDto) {
+        return compilationService.createCompilation(newCompilationDto);
+    }
+
+    @PatchMapping("/admin/compilations/{compId}")
+    public CompilationDto updateCompilation(@PathVariable @Positive Long compId,
+                                            @RequestBody @Valid UpdateCompilationRequestDto updateCompilationRequestDto) {
+        return compilationService.updateCompilation(compId, updateCompilationRequestDto);
     }
 
     @DeleteMapping("/admin/compilations/{compId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCompilation(@PathVariable @Positive Long comId) {
-        log.info("DELETE /admin/compilations/{}", comId);
-        service.deleteCompilation(comId);
-    }
-
-    @PatchMapping("/admin/compilations/{compId}")
-    public CompilationDto updateCompilation(@PathVariable @Positive Long comId,
-                                            @RequestBody UpdateCompilationRequestDto updateCompilationRequestDto) {
-        log.info("PATCH /admin/compilations/{}", comId);
-        return service.updateCompilation(comId, updateCompilationRequestDto);
+    public void deleteCompilation(@PathVariable @Positive Long compId) {
+        compilationService.deleteCompilation(compId);
     }
 }

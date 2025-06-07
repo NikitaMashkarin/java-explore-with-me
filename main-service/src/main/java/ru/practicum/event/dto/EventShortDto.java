@@ -12,13 +12,14 @@ import ru.practicum.user.dto.UserShortDto;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EventShortDto {
+    private Long id;
+    private String title;
     private String annotation;
     private CategoryDto category;
-    private Long confirmedRequests;
     private String eventDate;
-    private Long id;
+    private long confirmedRequests;
     private UserShortDto initiator;
     private boolean paid;
-    private String title;
-    private Long views;
+    private long views;
+    private int participantLimit;
 }

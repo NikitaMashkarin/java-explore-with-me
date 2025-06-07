@@ -29,7 +29,7 @@ public class EventMapper {
                 .eventDate(LocalDateTime.parse(newEventDto.getEventDate(), formatter))
                 .location(toLocation(newEventDto.getLocation()))
                 .paid(newEventDto.isPaid())
-                .participantLimit(Math.toIntExact(newEventDto.getParticipantLimit()))
+                .participantLimit(newEventDto.getParticipantLimit())
                 .requestModeration(newEventDto.isRequestModeration())
                 .build();
     }

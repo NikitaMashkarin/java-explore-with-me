@@ -1,55 +1,42 @@
 package ru.practicum.user.service;
 
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.exceptions.UserNotFoundException;
 import ru.practicum.user.dto.NewUserRequestDto;
 import ru.practicum.user.dto.UserDto;
-import ru.practicum.user.mapper.UserMapper;
-import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
+
+import static ru.practicum.user.mapper.UserMapper.toUser;
+import static ru.practicum.user.mapper.UserMapper.toUserDto;
 
 @Service
+@RequiredArgsConstructor
+@Transactional
 public class UserServiceImpl implements UserService {
-    private UserRepository userRepository;
+
+    private final UserRepository userRepository;
 
     @Override
-    public List<UserDto> getUsers(List<Long> ids, Integer from, Integer size) {
-        Pageable pageable = PageRequest.of(from / size, size);
-
-        List<User> users;
-        if (ids == null || ids.isEmpty()) {
-            users = userRepository.findAll(pageable).getContent();
-        } else {
-            users = userRepository.findAllById(ids)
-                    .stream()
-                    .skip(from)
-                    .limit(size)
-                    .collect(Collectors.toList());
-        }
-
-        return users.stream()
-                .map(UserMapper::toUserDto)
-                .collect(Collectors.toList());
+    public List<UserDto> getUsers(List<Long> ids, int from, int size) {
+        return toUserDto(userRepository.findByIdIn(ids, PageRequest.of(from / size, size)));
     }
 
     @Override
-    @Transactional
-    public UserDto addUser(NewUserRequestDto newUserRequestDto) {
-        return UserMapper.toUserDto(userRepository.save(UserMapper.toUser(newUserRequestDto)));
+    public List<UserDto> getUsers(int from, int size) {
+        return toUserDto(userRepository.findAll(PageRequest.of(from / size, size)));
     }
 
     @Override
-    @Transactional
-    public void deleteUser(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+    public UserDto createUser(NewUserRequestDto newUserRequestDto) {
+        return toUserDto(userRepository.save(toUser(newUserRequestDto)));
+    }
 
-        userRepository.delete(user);
+    @Override
+    public void deleteUser(Long id) {
+        userRepository.deleteById(id);
     }
 }

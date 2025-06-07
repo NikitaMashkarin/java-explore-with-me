@@ -1,9 +1,8 @@
 package ru.practicum.user.controller;
 
-import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.user.dto.NewUserRequestDto;
 import ru.practicum.user.dto.UserDto;
@@ -13,29 +12,31 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@Slf4j
+@RequestMapping("/admin/users")
+@Validated
 public class UserController {
-    private UserService service;
 
-    @GetMapping("/admin/users")
-    public List<UserDto> getUsers(@RequestParam List<Long> ids,
-                                  @RequestParam @Positive Integer from,
-                                  @RequestParam @Positive Integer size) {
-        log.info("GET /admin/users");
-        return service.getUsers(ids, from, size);
+    private final UserService userService;
+
+    @GetMapping
+    public List<UserDto> getUsers(@RequestParam(required = false) List<Long> ids,
+                                  @RequestParam(defaultValue = "0") int from,
+                                  @RequestParam(defaultValue = "10") int size) {
+        if (ids == null) {
+            return userService.getUsers(from, size);
+        }
+        return userService.getUsers(ids, from, size);
     }
 
-    @PostMapping("/admin/users")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto addUser(@RequestBody NewUserRequestDto newUserRequestDto) {
-        log.info("POST /admin/users");
-        return service.addUser(newUserRequestDto);
+    public UserDto createUser(@RequestBody @Validated NewUserRequestDto newUserRequestDto) {
+        return userService.createUser(newUserRequestDto);
     }
 
-    @DeleteMapping("/admin/users/{userId}")
+    @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUser(@PathVariable @Positive Long userId) {
-        log.info("DELETE /admin/users/{}", userId);
-        service.deleteUser(userId);
+    public void deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
     }
 }

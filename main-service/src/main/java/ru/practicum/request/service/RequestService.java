@@ -1,21 +1,21 @@
 package ru.practicum.request.service;
 
-import org.springframework.stereotype.Service;
 import ru.practicum.request.dto.EventRequestStatusUpdateRequestDto;
 import ru.practicum.request.dto.EventRequestStatusUpdateResultDto;
 import ru.practicum.request.dto.RequestDto;
 
 import java.util.List;
 
-@Service
 public interface RequestService {
-    List<RequestDto> getRequestByUserIdAndEventId(Long userId, Long eventId);
 
-    EventRequestStatusUpdateResultDto updateRequest(Long userId, Long eventId, EventRequestStatusUpdateRequestDto dto);
+    RequestDto createParticipationRequest(Long userId, Long eventId);
 
-    List<RequestDto> getRequests(Long userId);
+    RequestDto cancelParticipationRequest(Long userId, Long requestId);
 
-    RequestDto addRequest(Long userId, Long eventId);
+    List<RequestDto> getParticipationRequests(Long userId);
 
-    RequestDto deleteRequest(Long userId, Long requestId);
+    List<RequestDto> getParticipationRequestsForUserEvent(Long userId, Long eventId);
+
+    EventRequestStatusUpdateResultDto changeParticipationRequestsStatus(Long userId, Long eventId,
+                                                                        EventRequestStatusUpdateRequestDto eventRequestStatusUpdateRequest);
 }
