@@ -13,7 +13,6 @@ import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exceptions.CompilationNotFoundException;
 import ru.practicum.exceptions.ValidationRequestException;
 
-import java.awt.print.Pageable;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,7 +29,7 @@ public class CompilationServiceImpl implements CompilationService {
     public List<CompilationDto> getCompilations(Boolean pinned, Integer from, Integer size) {
         List<Compilation> compilations;
 
-        compilations = compilationRepository.findByPinned(pinned, (Pageable) PageRequest.of(from / size, size));
+        compilations = compilationRepository.findByPinned(pinned, PageRequest.of(from / size, size));
 
         return compilations.isEmpty()
                 ? List.of()

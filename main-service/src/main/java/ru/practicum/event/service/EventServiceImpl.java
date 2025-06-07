@@ -26,13 +26,12 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import ru.practicum.exceptions.CategoryNotFoundException;
-import ru.practicum.exceptions.EventNotFoundException;
-import ru.practicum.exceptions.UserNotFoundException;
-import ru.practicum.exceptions.ValidationRequestException;
+import ru.practicum.exceptions.*;
+import ru.practicum.location.model.Location;
 import ru.practicum.location.repository.LocationRepository;
 import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
@@ -95,71 +94,65 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto getEventsByUserIdAndEventId(Long userId, Long eventId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
-
-        Optional<Event> event = eventRepository.findByIdAndInitiatorId(eventId, userId);
-
-        if (event.isEmpty()) throw new EventNotFoundException(eventId);
-
-        return toEventFullDto(event.get());
+        userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
+        return toEventFullDto(event);
     }
 
     @Override
     @Transactional
-    public EventFullDto updateEvent(Long userId, Long eventId, UpdateEventUserRequestDto eventRequestDto) {
+    public EventFullDto updateEvent(Long userId, Long eventId, UpdateEventUserRequestDto dto) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
 
-        Optional<Event> eventOld = eventRepository.findByIdAndInitiatorId(eventId, userId);
-
-        if (eventOld.isEmpty()) throw new EventNotFoundException(eventId);
-
-        Event eventUpdate = eventOld.get();
-
-        if (eventUpdate.getState() == EventState.PUBLISHED)
-            throw new ValidationRequestException("Only pending or canceled events can be changed");
-
-        if (eventRequestDto.getAnnotation() != null) eventUpdate.setAnnotation(eventRequestDto.getAnnotation());
-
-        if (eventRequestDto.getCategory() != null) {
-            Category category = categoryRepository.findById(eventRequestDto.getCategory())
-                    .orElseThrow(() -> new CategoryNotFoundException(eventRequestDto.getCategory()));
-
-            eventUpdate.setCategory(category);
+        if (!Objects.equals(event.getInitiator().getId(), userId)) {
+            throw new ForbiddenException("Только инициатор может изменить событие");
         }
 
-        if (eventRequestDto.getDescription() != null) eventUpdate.setDescription(eventUpdate.getDescription());
+        if (event.getState() != EventState.PENDING && event.getState() != EventState.CANCELED) {
+            throw new ForbiddenException("Изменять можно только события в состоянии PENDING или CANCELED");
+        }
 
-        if (eventRequestDto.getEventDate() != null) {
-            LocalDateTime eventDate = LocalDateTime.parse(eventRequestDto.getEventDate(), formatter);
+        if (dto.getTitle() != null) event.setTitle(dto.getTitle());
+        if (dto.getAnnotation() != null) event.setAnnotation(dto.getAnnotation());
+        if (dto.getDescription() != null) event.setDescription(dto.getDescription());
+        if (dto.getPaid() != null) event.setPaid(dto.getPaid());
+        if (dto.getParticipantLimit() != null) {
+            if (dto.getParticipantLimit() < 0) {
+                throw new ValidationRequestException("Лимит участников не может быть отрицательным");
+            }
+            event.setParticipantLimit(dto.getParticipantLimit());
+        }
+        if (dto.getRequestModeration() != null) event.setRequestModeration(dto.getRequestModeration());
+
+        if (dto.getEventDate() != null) {
+            LocalDateTime eventDate = LocalDateTime.parse(dto.getEventDate(), formatter);
             if (eventDate.isBefore(LocalDateTime.now().plusHours(2))) {
                 throw new ValidationRequestException("Дата события должна быть минимум через 2 часа");
             }
-            eventUpdate.setEventDate(eventDate);
+            event.setEventDate(eventDate);
         }
 
-        if (eventRequestDto.getLocation() != null) eventUpdate.setLocation(toLocation(eventRequestDto.getLocation()));
-
-        if (eventRequestDto.getPaid() != null) eventUpdate.setPaid(eventRequestDto.getPaid());
-
-        if (eventRequestDto.getParticipantLimit() != null) {
-            if (eventRequestDto.getParticipantLimit() < 0)
-                throw new ValidationRequestException("Лимит участников не может быть отрицательным");
-
-            eventUpdate.setParticipantLimit(eventRequestDto.getParticipantLimit());
+        if (dto.getCategory() != null) {
+            Category category = categoryRepository.findById(dto.getCategory())
+                    .orElseThrow(() -> new CategoryNotFoundException(dto.getCategory()));
+            event.setCategory(category);
         }
 
-        if (eventRequestDto.getRequestModeration() != null)
-            eventUpdate.setRequestModeration(eventRequestDto.getRequestModeration());
-
-        if (eventRequestDto.getStateAction() == StateUserAction.SEND_TO_REVIEW) {
-            eventUpdate.setState(EventState.PENDING);
-        } else if (eventRequestDto.getStateAction() == StateUserAction.CANCEL_REVIEW) {
-            eventUpdate.setState(EventState.CANCELED);
+        if (dto.getLocation() != null) {
+            Location location = event.getLocation();
+            location.setLat(dto.getLocation().getLat());
+            location.setLon(dto.getLocation().getLon());
+            locationRepository.save(location);
         }
 
-        if (eventRequestDto.getTitle() != null) eventUpdate.setTitle(eventRequestDto.getTitle());
+        if (dto.getStateAction() == StateUserAction.SEND_TO_REVIEW) {
+            event.setState(EventState.PENDING);
+        } else if (dto.getStateAction() == StateUserAction.CANCEL_REVIEW) {
+            event.setState(EventState.CANCELED);
+        }
 
-        return toEventFullDto(eventRepository.save(eventUpdate));
+        return toEventFullDto(eventRepository.save(event));
     }
 
     @Override

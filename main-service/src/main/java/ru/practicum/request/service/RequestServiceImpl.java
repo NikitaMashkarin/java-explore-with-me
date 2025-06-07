@@ -37,12 +37,12 @@ public class RequestServiceImpl implements RequestService {
     public List<RequestDto> getRequestByUserIdAndEventId(Long userId, Long eventId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
-        Optional<Event> events = eventRepository.findByIdAndInitiatorId(eventId, userId);
+        List<Event> events = eventRepository.findByIdAndInitiatorId(eventId, userId);
         if (events.isEmpty()) {
             throw new ForbiddenException("Пользователь не инициатор события.");
         }
 
-        return requestRepository.findByEventIn(events.get()).stream()
+        return requestRepository.findByEventIn(events).stream()
                 .map(RequestMapper::toRequestDto)
                 .collect(Collectors.toList());
     }

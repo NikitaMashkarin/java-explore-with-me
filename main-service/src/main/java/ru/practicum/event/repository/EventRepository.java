@@ -10,14 +10,13 @@ import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
     Page<Event> findAllByInitiatorId(Long initiatorId, Pageable pageable);
 
-    Optional<Event> findByIdAndInitiatorId(Long id, Long initiatorId);
+    List<Event> findByIdAndInitiatorId(Long eventId, Long userId);
 
     @Query(value = """
             SELECT * FROM events e

@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @Repository
 public interface RequestRepository extends JpaRepository<Request, Long> {
-    List<Request> findByEventIn(Event events);
+    List<Request> findByEventIn(List<Event> events);
 
     Integer countByEventIdAndStatus(Long id, RequestStatus requestStatus);
 
