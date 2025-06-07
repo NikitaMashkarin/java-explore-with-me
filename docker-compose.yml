@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   stats-server:
     build: stat-service/stat-server
@@ -10,9 +8,9 @@ services:
     depends_on:
       - stats-db
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/stats
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=root
+      SPRING_DATASOURCE_URL: jdbc:postgresql://stats-db:5432/stats
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
 
   stats-db:
     image: postgres:14-alpine
@@ -20,10 +18,10 @@ services:
     ports:
       - "6551:5432"
     environment:
-      - POSTGRES_DB=stats
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=root
-      - TZ=GMT
+      POSTGRES_DB: stats
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      TZ: GMT
 
   ewm-service:
     build: main-service
@@ -34,10 +32,10 @@ services:
     depends_on:
       - ewm-db
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=root
-      - STAT_SERVER_URL=http://stat-server:9090
+      SPRING_DATASOURCE_URL: jdbc:postgresql://ewm-db:5432/ewm
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      STAT_SERVER_URL: http://stat-server:9090
 
   ewm-db:
     image: postgres:14-alpine
@@ -45,7 +43,7 @@ services:
     ports:
       - "6541:5432"
     environment:
-      - POSTGRES_DB=ewm
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=root
-      - TZ=GMT
+      POSTGRES_DB: ewm
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      TZ: GMT
