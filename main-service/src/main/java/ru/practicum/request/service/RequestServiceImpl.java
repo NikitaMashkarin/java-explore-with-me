@@ -22,7 +22,6 @@ import ru.practicum.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ru.practicum.request.mapper.RequestMapper.toRequestDto;
