@@ -1,7 +1,6 @@
 package ru.practicum;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -11,29 +10,24 @@ import org.springframework.web.client.RestTemplate;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component
 @Slf4j
+@Component
 public class StatClient {
-
     private final RestTemplate rest;
-    private final String statsServiceUri;
+    private static final String STAT_SERVER_URL = "http://stat-server:9090";
 
-    public StatClient(@Value("${statistics-server.url:http://localhost:9090}") String statsServiceUri,
-                      RestTemplate rest) {
-        this.rest = rest;
-        this.statsServiceUri = statsServiceUri;
+    public StatClient() {
+        this.rest = new RestTemplate();
     }
 
     public void addHit(HitDto hitDto) {
-        String url = statsServiceUri + "/hit";
         HttpEntity<HitDto> requestEntity = new HttpEntity<>(hitDto);
-
-        log.info("POST-запрос отправлен по {}", url);
+        log.info("Отправка POST-запроса в StatServer: {}", hitDto);
         try {
-            rest.exchange(url, HttpMethod.POST, requestEntity, Object.class);
-            log.info("Выполнено");
+            rest.exchange(STAT_SERVER_URL + "/hit", HttpMethod.POST, requestEntity, Void.class);
+            log.info("POST-запрос успешно выполнен.");
         } catch (Exception e) {
-            log.error("Ошибка при отправке запроса на {}", url, e);
+            log.error("Ошибка при отправке POST-запроса в StatServer", e);
         }
     }
 
@@ -43,7 +37,7 @@ public class StatClient {
         parameters.put("end", end);
         parameters.put("unique", unique);
 
-        StringBuilder pathBuilder = new StringBuilder(statsServiceUri)
+        StringBuilder pathBuilder = new StringBuilder(STAT_SERVER_URL)
                 .append("/stats?start={start}&end={end}&unique={unique}");
 
         if (uris != null && uris.length > 0) {
