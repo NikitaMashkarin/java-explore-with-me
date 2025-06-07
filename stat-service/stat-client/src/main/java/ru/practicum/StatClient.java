@@ -37,29 +37,31 @@ public class StatClient {
         }
     }
 
-    public ResponseEntity<Object> getStats(String start, String end, String[] uris, boolean unique) {
-        StringBuilder pathBuilder = new StringBuilder(statsServiceUri + "/stats?start={start}&end={end}&unique={unique}");
+    public ResponseEntity<StatDto[]> getStats(String start, String end, String[] uris, boolean unique) {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("start", start);
         parameters.put("end", end);
         parameters.put("unique", unique);
 
+        StringBuilder pathBuilder = new StringBuilder(statsServiceUri)
+                .append("/stats?start={start}&end={end}&unique={unique}");
+
         if (uris != null && uris.length > 0) {
-            String joinedUris = String.join(",", uris);
-            parameters.put("uris", joinedUris);
+            parameters.put("uris", uris);
             pathBuilder.append("&uris={uris}");
         }
 
         String path = pathBuilder.toString();
-        log.info("GET-запрос отправлен по {}", path);
+        log.info("Отправка GET-запроса в StatServer: path={}, params={}", path, parameters);
 
         try {
-            ResponseEntity<Object> response = rest.getForEntity(path, Object.class, parameters);
-            log.info("Ответ: status={}, body={}", response.getStatusCode(), response.getBody());
+            ResponseEntity<StatDto[]> response = rest.getForEntity(path, StatDto[].class, parameters);
+            log.info("Ответ от StatServer: status={}, body={}", response.getStatusCode(), response.getBody());
+
             return response;
         } catch (Exception e) {
-            log.error("Ошибка при выполнении запроса на {}", path, e);
-            return ResponseEntity.status(500).body("Ошибка при обращении к серверу");
+            log.error("Ошибка при отправке GET-запроса в StatServer", e);
+            return ResponseEntity.status(500).body(null);
         }
     }
 }

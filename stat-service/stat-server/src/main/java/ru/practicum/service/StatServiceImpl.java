@@ -47,4 +47,6 @@ public class StatServiceImpl implements StatService {
                 ? Collections.emptyList()
                 : stats.stream().map(StatMapper::toStatDto).collect(Collectors.toList());
     }
+
+
 }
