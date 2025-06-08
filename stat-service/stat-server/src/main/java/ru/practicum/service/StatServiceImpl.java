@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.HitDto;
 import ru.practicum.StatDto;
+import ru.practicum.exception.BadRequestException;
 import ru.practicum.mapper.StatMapper;
 import ru.practicum.model.Stat;
 import ru.practicum.repository.StatRepository;
@@ -30,6 +31,10 @@ public class StatServiceImpl implements StatService {
 
     @Override
     public List<StatDto> getStats(LocalDateTime start, LocalDateTime end, String[] uris, boolean unique) {
+        if (start.isAfter(end)) {
+            throw new BadRequestException("Дата начала не может быть позже даты окончания");
+        }
+
         List<Stat> stats;
 
         if (uris == null || uris.length == 0) {
