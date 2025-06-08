@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.HitDto;
 import ru.practicum.StatDto;
-import ru.practicum.exceptions.ValidationRequestException;
+import ru.practicum.exception.ValidationRequestException;
 import ru.practicum.mapper.StatMapper;
 import ru.practicum.model.Stat;
 import ru.practicum.repository.StatRepository;
@@ -31,11 +31,11 @@ public class StatServiceImpl implements StatService {
 
     @Override
     public List<StatDto> getStats(LocalDateTime start, LocalDateTime end, String[] uris, boolean unique) {
-        if (start.isAfter(end)) {
-            throw new ValidationRequestException("Дата начала не может быть позже даты окончания");
-        }
-
         List<Stat> stats;
+
+        if (start.isAfter(end)) {
+            throw new ValidationRequestException("Параметр 'start' не может быть позже параметра 'end'.");
+        }
 
         if (uris == null || uris.length == 0) {
             stats = unique
@@ -52,6 +52,4 @@ public class StatServiceImpl implements StatService {
                 ? Collections.emptyList()
                 : stats.stream().map(StatMapper::toStatDto).collect(Collectors.toList());
     }
-
-
 }
