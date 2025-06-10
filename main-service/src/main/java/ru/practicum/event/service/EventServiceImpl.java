@@ -2,6 +2,7 @@ package ru.practicum.event.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,7 @@ import static ru.practicum.location.mapper.LocationMapper.toLocation;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EventServiceImpl implements EventService {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -295,6 +297,14 @@ public class EventServiceImpl implements EventService {
 
         int previousHits = getHits(request);
         sendHit(request);
+
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warn("Поток был прерван во время ожидания", e);
+        }
+
         int newHits = getHits(request);
 
         if (newHits > previousHits) {

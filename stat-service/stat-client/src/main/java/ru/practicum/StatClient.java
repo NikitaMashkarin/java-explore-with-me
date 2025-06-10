@@ -14,13 +14,11 @@ import java.util.Map;
 @Slf4j
 @Component
 public class StatClient {
-    private final RestTemplate restTemplate;
+    private RestTemplate restTemplate;
     private final String statsServiceUri;
 
-    public StatClient(@Value("${statistics-server.url:http://localhost:9090}") String statsServiceUri,
-                      RestTemplate restTemplate) {
+    public StatClient(@Value("${statistics-server.url:http://localhost:9090}") String statsServiceUri) {
         this.statsServiceUri = statsServiceUri;
-        this.restTemplate = restTemplate;
     }
 
     public void addHit(HitDto hitDto) {
