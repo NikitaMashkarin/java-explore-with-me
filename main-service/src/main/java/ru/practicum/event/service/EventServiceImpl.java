@@ -297,14 +297,6 @@ public class EventServiceImpl implements EventService {
 
         int previousHits = getHits(request);
         sendHit(request);
-
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            log.warn("Поток был прерван во время ожидания", e);
-        }
-
         int newHits = getHits(request);
 
         if (newHits > previousHits) {
