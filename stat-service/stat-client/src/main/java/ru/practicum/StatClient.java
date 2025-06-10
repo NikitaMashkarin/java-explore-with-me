@@ -15,10 +15,10 @@ import java.util.Map;
 @Component
 public class StatClient {
     private RestTemplate restTemplate;
-    private static String statsServiceUri;
+    private final String statsServiceUri;
 
     public StatClient(@Value("${statistics-server.url:http://localhost:9090}") String statsServiceUri) {
-        StatClient.statsServiceUri = statsServiceUri;
+        this.statsServiceUri = statsServiceUri;
     }
 
     public void addHit(HitDto hitDto) {
