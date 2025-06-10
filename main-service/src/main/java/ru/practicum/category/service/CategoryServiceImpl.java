@@ -29,7 +29,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final EventRepository eventRepository;
 
     @Override
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public List<CategoryDto> getCategories(int from, int size) {
         return categoryRepository.findAll(PageRequest.of(from / size, size))
                 .stream()
@@ -38,7 +38,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public CategoryDto getCategoryById(long catId) {
         return toCategoryDto(categoryRepository.findById(catId)
                 .orElseThrow(() -> new CategoryNotFoundException(catId)));
