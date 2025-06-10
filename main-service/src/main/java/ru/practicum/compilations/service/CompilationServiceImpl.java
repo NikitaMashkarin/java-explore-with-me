@@ -28,6 +28,7 @@ public class CompilationServiceImpl implements CompilationService {
     private final EventRepository eventRepository;
 
     @Override
+    @Transactional(readOnly=true)
     public List<CompilationDto> getCompilations(Boolean pinned, int from, int size) {
         List<Compilation> compilations;
         if (pinned != null) {
@@ -41,6 +42,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
+    @Transactional(readOnly=true)
     public CompilationDto getCompilationById(Long compId) {
         return toCompilationDto(compilationRepository.findById(compId)
                 .orElseThrow(() -> new CompilationNotFoundException(compId)));

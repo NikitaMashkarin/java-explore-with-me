@@ -1,6 +1,7 @@
 package ru.practicum;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -9,22 +10,21 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
-
 @Slf4j
 @Component
 public class StatClient {
-    private final RestTemplate rest;
-    private static final String STAT_SERVER_URL = "http://stat-server:9090";
+    private RestTemplate restTemplate;
+    private static String statsServiceUri;
 
-    public StatClient() {
-        this.rest = new RestTemplate();
+    public StatClient(@Value("${statistics-server.url:http://localhost:9090}") String statsServiceUri) {
+        StatClient.statsServiceUri = statsServiceUri;
     }
 
     public void addHit(HitDto hitDto) {
         HttpEntity<HitDto> requestEntity = new HttpEntity<>(hitDto);
         log.info("Отправка POST-запроса в StatServer: {}", hitDto);
         try {
-            rest.exchange(STAT_SERVER_URL + "/hit", HttpMethod.POST, requestEntity, Void.class);
+            restTemplate.exchange(statsServiceUri + "/hit", HttpMethod.POST, requestEntity, Void.class);
             log.info("POST-запрос успешно выполнен.");
         } catch (Exception e) {
             log.error("Ошибка при отправке POST-запроса в StatServer", e);
@@ -37,7 +37,7 @@ public class StatClient {
         parameters.put("end", end);
         parameters.put("unique", unique);
 
-        StringBuilder pathBuilder = new StringBuilder(STAT_SERVER_URL)
+        StringBuilder pathBuilder = new StringBuilder(statsServiceUri)
                 .append("/stats?start={start}&end={end}&unique={unique}");
 
         if (uris != null && uris.length > 0) {
@@ -49,7 +49,7 @@ public class StatClient {
         log.info("Отправка GET-запроса в StatServer: path={}, params={}", path, parameters);
 
         try {
-            ResponseEntity<StatDto[]> response = rest.getForEntity(path, StatDto[].class, parameters);
+            ResponseEntity<StatDto[]> response = restTemplate.getForEntity(path, StatDto[].class, parameters);
             log.info("Ответ от StatServer: status={}, body={}", response.getStatusCode(), response.getBody());
 
             return response;
