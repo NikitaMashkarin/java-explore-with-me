@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.category.controller.CategoryController;
+import ru.practicum.comments.controller.CommentController;
 import ru.practicum.compilations.controller.CompilationsController;
 import ru.practicum.event.controller.EventController;
 import ru.practicum.request.controller.RequestController;
@@ -21,7 +22,8 @@ import java.time.format.DateTimeFormatter;
         CategoryController.class,
         EventController.class,
         RequestController.class,
-        CompilationsController.class
+        CompilationsController.class,
+        CommentController.class
 })
 public class ErrorHandler {
 
