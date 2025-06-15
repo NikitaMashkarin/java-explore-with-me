@@ -1,2 +1,1 @@
-
 https://github.com/NikitaMashkarin/java-explore-with-me/pull/3
