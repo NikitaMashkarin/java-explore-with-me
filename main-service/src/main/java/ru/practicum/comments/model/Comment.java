@@ -24,18 +24,11 @@ public class Comment {
     @Column(name = "created_on", nullable = false, updatable = false)
     private LocalDateTime createdOn;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private CommentState state;
-
     @Column(nullable = false, length = 512)
     private String text;
 
     @Column(name = "updated_on")
     private LocalDateTime updatedOn;
-
-    @Column(name = "published_on")
-    private LocalDateTime publishedOn;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)

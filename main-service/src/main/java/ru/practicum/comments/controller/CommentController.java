@@ -20,19 +20,19 @@ public class CommentController {
     @ResponseStatus(HttpStatus.CREATED)
     public CommentResponseDto createComment(@PathVariable @Positive Long userId,
                                             @PathVariable @Positive Long eventId,
-                                            @RequestBody NewCommentDto newCommentDto){
+                                            @RequestBody NewCommentDto newCommentDto) {
         return service.createComment(userId, eventId, newCommentDto);
     }
 
     @PatchMapping("/user/{userId}/comment/{commentId}")
     public CommentResponseDto updateComment(@PathVariable @Positive Long userId,
                                             @PathVariable @Positive Long commentId,
-                                            @RequestBody NewCommentDto newCommentDto){
+                                            @RequestBody NewCommentDto newCommentDto) {
         return service.updateComment(userId, commentId, newCommentDto);
     }
 
     @GetMapping("/events/{eventId}/comments")
-    public List<CommentResponseDto> getCommentsByEventId(@PathVariable @Positive Long eventId){
+    public List<CommentResponseDto> getCommentsByEventId(@PathVariable @Positive Long eventId) {
         return service.getCommentsByEventId(eventId);
     }
 
@@ -46,11 +46,5 @@ public class CommentController {
     public void deleteComment(@PathVariable @Positive Long userId,
                               @PathVariable @Positive Long commentId) {
         service.deleteComment(userId, commentId);
-    }
-
-    @PatchMapping("/admin/comment/{commentId}")
-    public CommentResponseDto updateState(@PathVariable @Positive Long commentId,
-                                          @RequestParam boolean isConfirm) {
-        return service.updateState(commentId, isConfirm);
     }
 }
