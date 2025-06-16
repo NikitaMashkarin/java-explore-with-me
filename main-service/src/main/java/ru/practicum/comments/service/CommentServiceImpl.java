@@ -2,6 +2,7 @@ package ru.practicum.comments.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.comments.dto.CommentResponseDto;
 import ru.practicum.comments.dto.NewCommentDto;
 import ru.practicum.comments.mapper.CommentMapper;
@@ -28,6 +29,8 @@ public class CommentServiceImpl implements CommentService {
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
 
+    @Override
+    @Transactional
     public CommentResponseDto createComment(Long userId, Long eventId, NewCommentDto dto) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
 
@@ -41,6 +44,8 @@ public class CommentServiceImpl implements CommentService {
         return toCommentResponseDto(commentRepository.save(comment));
     }
 
+    @Override
+    @Transactional
     public CommentResponseDto updateComment(Long userId, Long commentId, NewCommentDto dto) {
         userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
 
@@ -53,6 +58,8 @@ public class CommentServiceImpl implements CommentService {
         return toCommentResponseDto(commentRepository.save(comment));
     }
 
+    @Override
+    @Transactional(readOnly = true)
     public List<CommentResponseDto> getCommentsByEventId(Long eventId) {
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
 
@@ -62,6 +69,8 @@ public class CommentServiceImpl implements CommentService {
                 .toList();
     }
 
+    @Override
+    @Transactional(readOnly = true)
     public CommentResponseDto getCommentById(Long commentId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CommentNotFoundException(commentId));
@@ -69,6 +78,8 @@ public class CommentServiceImpl implements CommentService {
         return toCommentResponseDto(comment);
     }
 
+    @Override
+    @Transactional
     public void deleteComment(Long userId, Long commentId) {
         userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
 

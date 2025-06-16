@@ -3,6 +3,7 @@ package ru.practicum.comments.controller;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.comments.dto.CommentResponseDto;
 import ru.practicum.comments.dto.NewCommentDto;
@@ -13,6 +14,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping
+@Validated
 public class CommentController {
     private final CommentService service;
 
