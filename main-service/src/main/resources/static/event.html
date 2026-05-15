@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+
+    <title>Событие</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="navbar">
+    <a href="events.html">Назад</a>
+</div>
+
+<div class="container">
+
+    <div id="eventContainer"></div>
+
+    <div class="card">
+
+        <h2>Комментарии</h2>
+
+        <textarea id="commentText"></textarea>
+
+        <button onclick="createCommentForEvent()">
+            Отправить комментарий
+        </button>
+
+        <div id="comments"></div>
+
+    </div>
+
+</div>
+
+<script src="js/app.js"></script>
+
+<script>
+
+    const params =
+        new URLSearchParams(location.search);
+
+    const eventId =
+        params.get("id");
+
+    async function loadEvent() {
+
+        const event =
+            await getPublishedEventById(eventId);
+
+        document.getElementById("eventContainer")
+            .innerHTML = `
+
+        <div class="card">
+
+            <h1>${event.title}</h1>
+
+            <p>${event.description}</p>
+
+            <p>
+                <strong>Дата:</strong>
+                ${event.eventDate}
+            </p>
+
+            <p>
+                <strong>Статус:</strong>
+                ${event.state}
+            </p>
+
+            <p>
+                <strong>Лимит:</strong>
+                ${event.participantLimit}
+            </p>
+
+        </div>
+    `;
+    }
+
+    async function loadComments() {
+
+        const comments =
+            await getCommentsByEventId(eventId);
+
+        const container =
+            document.getElementById("comments");
+
+        container.innerHTML = "";
+
+        comments.forEach(comment => {
+
+            container.innerHTML += `
+
+            <div class="event-card">
+
+                <p>${comment.text}</p>
+
+                <p>
+                    ${comment.createdOn}
+                </p>
+
+                <button onclick="deleteCommentById(${comment.id})">
+                    Удалить
+                </button>
+
+            </div>
+        `;
+        });
+    }
+
+    async function createCommentForEvent() {
+
+        const text =
+            document.getElementById("commentText").value;
+
+        await createComment(eventId, text);
+
+        document.getElementById("commentText").value = "";
+
+        loadComments();
+    }
+
+    async function deleteCommentById(id) {
+
+        await deleteComment(id);
+
+        loadComments();
+    }
+
+    loadEvent();
+
+    loadComments();
+
+</script>
+
+</body>
+</html>

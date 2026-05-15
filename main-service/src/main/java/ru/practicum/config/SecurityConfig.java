@@ -30,9 +30,12 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/categories/**",
                                 "/events/**",
-                                "/users/**"
+                                "/users/**",
+                                "/requests/**",
+                                "/comment/**",
+                                "/categories/**",
+                                "/compilations/**"
                         ).permitAll()
 
                         .anyRequest().authenticated()

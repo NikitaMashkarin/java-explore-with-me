@@ -15,9 +15,83 @@
 
     <h1>Категории</h1>
 
-    <button onclick="loadCategories()">
-        Загрузить категории
-    </button>
+    <div class="card">
+
+        <h2>Получить все категории</h2>
+
+        <button onclick="loadCategories()">
+            Загрузить категории
+        </button>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Получить категорию по ID</h2>
+
+        <input type="number"
+               id="getCategoryId"
+               placeholder="ID категории">
+
+        <button onclick="getCategoryById()">
+            Получить категорию
+        </button>
+
+        <div id="singleCategory"></div>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Создать категорию</h2>
+
+        <input type="text"
+               id="createCategoryName"
+               placeholder="Название категории">
+
+        <button onclick="createCategory()">
+            Создать
+        </button>
+
+        <div id="createCategoryResult"></div>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Обновить категорию</h2>
+
+        <input type="number"
+               id="updateCategoryId"
+               placeholder="ID категории">
+
+        <input type="text"
+               id="updateCategoryName"
+               placeholder="Новое название">
+
+        <button onclick="updateCategory()">
+            Обновить
+        </button>
+
+        <div id="updateCategoryResult"></div>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Удалить категорию</h2>
+
+        <input type="number"
+               id="deleteCategoryId"
+               placeholder="ID категории">
+
+        <button onclick="deleteCategory()">
+            Удалить
+        </button>
+
+        <div id="deleteCategoryResult"></div>
+
+    </div>
 
     <div id="categories" class="grid"></div>
 

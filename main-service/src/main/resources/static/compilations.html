@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Подборки</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="navbar">
+    <a href="index.html">Главная</a>
+</div>
+
+<div class="container">
+
+    <h1>Подборки</h1>
+
+    <div class="card">
+
+        <h2>Получить подборки</h2>
+
+        <label>
+            <input type="checkbox"
+                   id="filterPinned">
+
+            Только закрепленные
+        </label>
+
+        <button onclick="loadCompilations()">
+            Загрузить подборки
+        </button>
+
+    </div>
+
+    <div id="compilations"
+         class="grid"></div>
+
+    <div class="card">
+
+        <h2>Получить подборку по ID</h2>
+
+        <input type="number"
+               id="getCompilationId"
+               placeholder="ID подборки">
+
+        <button onclick="getCompilationById()">
+            Получить подборку
+        </button>
+
+        <div id="singleCompilation"></div>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Создать подборку</h2>
+
+        <input type="text"
+               id="createCompilationTitle"
+               placeholder="Название">
+
+        <input type="text"
+               id="createCompilationEvents"
+               placeholder="ID событий через запятую">
+
+        <label>
+            <input type="checkbox"
+                   id="createCompilationPinned">
+
+            Закрепить
+        </label>
+
+        <button onclick="createCompilation()">
+            Создать подборку
+        </button>
+
+        <div id="createCompilationResult"></div>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Обновить подборку</h2>
+
+        <input type="number"
+               id="updateCompilationId"
+               placeholder="ID подборки">
+
+        <input type="text"
+               id="updateCompilationTitle"
+               placeholder="Новое название">
+
+        <input type="text"
+               id="updateCompilationEvents"
+               placeholder="ID событий через запятую">
+
+        <label>
+            <input type="checkbox"
+                   id="updateCompilationPinned">
+
+            Закрепить
+        </label>
+
+        <button onclick="updateCompilation()">
+            Обновить подборку
+        </button>
+
+        <div id="updateCompilationResult"></div>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Удалить подборку</h2>
+
+        <input type="number"
+               id="deleteCompilationId"
+               placeholder="ID подборки">
+
+        <button onclick="deleteCompilation()">
+            Удалить подборку
+        </button>
+
+        <div id="deleteCompilationResult"></div>
+
+    </div>
+
+</div>
+
+<script src="js/app.js"></script>
+
+<script>
+    loadCompilations();
+</script>
+
+</body>
+</html>
