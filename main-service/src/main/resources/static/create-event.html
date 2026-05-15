@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Создать событие</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="navbar">
+    <a href="index.html">Главная</a>
+</div>
+
+<div class="container">
+
+    <div class="card">
+
+        <h2>Создание события</h2>
+
+        <input type="text"
+               id="eventTitle"
+               placeholder="Название">
+
+        <textarea id="eventAnnotation"
+                  placeholder="Аннотация"></textarea>
+
+        <textarea id="eventDescription"
+                  placeholder="Описание"></textarea>
+
+        <input type="datetime-local"
+               id="eventDate">
+
+        <input type="number"
+               id="eventCategory"
+               placeholder="ID категории">
+
+        <input type="number"
+               id="eventLat"
+               placeholder="Latitude">
+
+        <input type="number"
+               id="eventLon"
+               placeholder="Longitude">
+
+        <button onclick="createEvent()">
+            Создать событие
+        </button>
+
+        <div id="eventResult"></div>
+
+    </div>
+
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>

@@ -6,10 +6,13 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.event.dto.*;
 import ru.practicum.event.service.EventService;
+import ru.practicum.user.model.CustomUserDetails;
 
 import java.util.List;
 
@@ -21,34 +24,35 @@ public class EventController {
 
     private final EventService eventService;
 
-    @PostMapping("/users/{userId}/events")
+    @PostMapping("/events")
     @ResponseStatus(HttpStatus.CREATED)
-    public EventFullDto createEvent(@PathVariable @Positive Long userId,
+    public EventFullDto createEvent(@AuthenticationPrincipal CustomUserDetails user,
                                     @RequestBody @Valid NewEventDto newEventDto) {
-        return eventService.createEvent(userId, newEventDto);
+        return eventService.createEvent(user.getId(), newEventDto);
     }
 
-    @GetMapping("/users/{userId}/events")
-    public List<EventShortDto> getUserEvents(@PathVariable @Positive Long userId,
+    @GetMapping("/events")
+    public List<EventShortDto> getUserEvents(@AuthenticationPrincipal CustomUserDetails user,
                                              @RequestParam(defaultValue = "0") @PositiveOrZero int from,
                                              @RequestParam(defaultValue = "10") @Positive int size) {
-        return eventService.getEvents(userId, from, size);
+        return eventService.getEvents(user.getId(), from, size);
     }
 
-    @GetMapping("/users/{userId}/events/{eventId}")
-    public EventFullDto getUserEventById(@PathVariable @Positive Long userId,
+    @GetMapping("/events/{eventId}")
+    public EventFullDto getUserEventById(@AuthenticationPrincipal CustomUserDetails user,
                                          @PathVariable @Positive Long eventId) {
-        return eventService.getEventById(userId, eventId);
+        return eventService.getEventById(user.getId(), eventId);
     }
 
-    @PatchMapping("/users/{userId}/events/{eventId}")
-    public EventFullDto updateUserEvent(@PathVariable @Positive Long userId,
+    @PatchMapping("/events/{eventId}")
+    public EventFullDto updateUserEvent(@AuthenticationPrincipal CustomUserDetails user,
                                         @PathVariable @Positive Long eventId,
                                         @RequestBody @Valid UpdateEventUserRequestDto updateEventUserRequestDto) {
-        return eventService.updateEventByUser(userId, eventId, updateEventUserRequestDto);
+        return eventService.updateEventByUser(user.getId(), eventId, updateEventUserRequestDto);
     }
 
     @GetMapping("/admin/events")
+    @PreAuthorize("hasRole('ADMIN')")
     public List<EventFullDto> getAdminEvents(@RequestParam(required = false) List<Long> users,
                                              @RequestParam(required = false) List<String> states,
                                              @RequestParam(required = false) List<Long> categories,
@@ -60,6 +64,7 @@ public class EventController {
     }
 
     @PatchMapping("/admin/events/{eventId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public EventFullDto updateAdminEvent(@PathVariable @Positive Long eventId,
                                          @RequestBody @Valid UpdateEventAdminRequestDto updateEventAdminRequestDto) {
         return eventService.updateEventByAdmin(eventId, updateEventAdminRequestDto);

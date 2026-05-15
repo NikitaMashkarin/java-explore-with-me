@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Регистрация</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="navbar">
+    <a href="index.html">Главная</a>
+</div>
+
+<div class="container">
+
+    <div class="card auth-card">
+
+        <h2>Регистрация</h2>
+
+        <input type="text"
+               id="regName"
+               placeholder="Имя">
+
+        <input type="email"
+               id="regEmail"
+               placeholder="Email">
+
+        <input type="text"
+               id="regUsername"
+               placeholder="Username">
+
+        <input type="password"
+               id="regPassword"
+               placeholder="Password">
+
+        <button onclick="register()">
+            Зарегистрироваться
+        </button>
+
+        <div id="registerResult"></div>
+
+    </div>
+
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>

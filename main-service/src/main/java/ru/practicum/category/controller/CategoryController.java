@@ -3,6 +3,7 @@ package ru.practicum.category.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.category.dto.NewCategoryDto;
@@ -30,12 +31,14 @@ public class CategoryController {
 
     @PostMapping("/admin/categories")
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMIN')")
     public CategoryDto createCategory(@RequestBody @Valid NewCategoryDto newCategoryDto) {
         return categoryService.createCategory(newCategoryDto);
     }
 
     @PatchMapping("/admin/categories/{catId}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ADMIN')")
     public CategoryDto updateCategory(@PathVariable Long catId,
                                       @RequestBody @Valid NewCategoryDto newCategoryDto) {
         return categoryService.updateCategory(catId, newCategoryDto);
@@ -43,6 +46,7 @@ public class CategoryController {
 
     @DeleteMapping("/admin/categories/{catId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteCategory(@PathVariable Long catId) {
         categoryService.deleteCategory(catId);
     }

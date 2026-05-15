@@ -2,10 +2,12 @@ package ru.practicum.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.user.dto.NewUserRequestDto;
 import ru.practicum.user.dto.UserDto;
+import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
 
 import java.util.List;
@@ -19,6 +21,8 @@ import static ru.practicum.user.mapper.UserMapper.toUserDto;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder encoder;
+
 
     @Override
     public List<UserDto> getUsers(List<Long> ids, int from, int size) {
@@ -33,7 +37,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(NewUserRequestDto newUserRequestDto) {
-        return toUserDto(userRepository.save(toUser(newUserRequestDto)));
+        User user = toUser(newUserRequestDto);
+        user.setPassword(encoder.encode(user.getPassword()));
+        user.setRole("USER");
+        return toUserDto(userRepository.save(user));
     }
 
     @Override

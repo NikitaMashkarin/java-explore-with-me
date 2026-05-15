@@ -22,4 +22,7 @@ public class NewUserRequestDto {
     @Email(message = "Email должен быть корректным.")
     @Size(min = 6, max = 254, message = "Email должен содержать от 6 до 254 символов.")
     private String email;
+
+    private String username;
+    private String password;
 }

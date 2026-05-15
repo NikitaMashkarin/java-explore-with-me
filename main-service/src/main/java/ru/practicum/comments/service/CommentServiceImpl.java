@@ -12,6 +12,7 @@ import ru.practicum.event.model.Event;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exceptions.CommentNotFoundException;
 import ru.practicum.exceptions.EventNotFoundException;
+import ru.practicum.exceptions.ForbiddenException;
 import ru.practicum.exceptions.UserNotFoundException;
 import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
@@ -32,13 +33,11 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public CommentResponseDto createComment(Long userId, Long eventId, NewCommentDto dto) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
-
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
 
         Comment comment = toComment(dto);
         comment.setCreatedOn(LocalDateTime.now());
-        comment.setAuthorId(user);
+        comment.setAuthorId(userRepository.findById(userId).get());
         comment.setEventId(event);
 
         return toCommentResponseDto(commentRepository.save(comment));
@@ -47,11 +46,13 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public CommentResponseDto updateComment(Long userId, Long commentId, NewCommentDto dto) {
-        userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
 
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CommentNotFoundException(commentId));
 
+        if(!comment.getAuthorId().equals(userRepository.findById(userId).get())){
+            throw new ForbiddenException("Изменить может только автор");
+        }
         comment.setText(dto.getText());
         comment.setUpdatedOn(LocalDateTime.now());
 
@@ -81,10 +82,13 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public void deleteComment(Long userId, Long commentId) {
-        userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
 
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CommentNotFoundException(commentId));
+
+        if(!comment.getAuthorId().equals(userRepository.findById(userId).get())){
+            throw new ForbiddenException("Удалить может только автор");
+        }
 
         commentRepository.delete(comment);
     }

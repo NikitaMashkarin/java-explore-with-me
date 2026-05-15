@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Вход</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="navbar">
+    <a href="index.html">Главная</a>
+</div>
+
+<div class="container">
+
+    <div class="card auth-card">
+
+        <h2>Авторизация</h2>
+
+        <input type="text"
+               id="loginUsername"
+               placeholder="Username">
+
+        <input type="password"
+               id="loginPassword"
+               placeholder="Password">
+
+        <button onclick="login()">
+            Войти
+        </button>
+
+        <div id="loginResult"></div>
+
+    </div>
+
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
