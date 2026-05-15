@@ -31,7 +31,7 @@ public class EventController {
         return eventService.createEvent(user.getId(), newEventDto);
     }
 
-    @GetMapping("/events")
+    @GetMapping("/events/user")
     public List<EventShortDto> getUserEvents(@AuthenticationPrincipal CustomUserDetails user,
                                              @RequestParam(defaultValue = "0") @PositiveOrZero int from,
                                              @RequestParam(defaultValue = "10") @Positive int size) {

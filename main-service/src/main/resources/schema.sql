@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS users (
     name VARCHAR(250) NOT NULL,
     email VARCHAR(254) NOT NULL,
     username VARCHAR(254) NOT NULL,
-    password VARCHAR(254) NOT NULL,''
+    password VARCHAR(254) NOT NULL,
     role VARCHAR(30) NOT NULL,
     CONSTRAINT pk_user PRIMARY KEY (id),
     CONSTRAINT uq_user_email UNIQUE (email)

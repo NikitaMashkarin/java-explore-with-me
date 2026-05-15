@@ -27,12 +27,6 @@ public class UserController {
         return userService.getUsers(ids, from, size);
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public UserDto createUser(@RequestBody @Valid NewUserRequestDto newUserRequestDto) {
-        return userService.createUser(newUserRequestDto);
-    }
-
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable Long id) {
