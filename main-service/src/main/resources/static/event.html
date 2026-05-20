@@ -15,13 +15,35 @@
 
 <div class="container">
 
+    <!-- Поиск -->
+    <div class="card">
+
+        <h2>Поиск события</h2>
+
+        <input
+                type="text"
+                id="searchText"
+                placeholder="Введите текст для поиска"
+        >
+
+        <button onclick="searchEvents()">
+            Найти
+        </button>
+
+    </div>
+
+    <!-- Событие -->
     <div id="eventContainer"></div>
 
+    <!-- Комментарии -->
     <div class="card">
 
         <h2>Комментарии</h2>
 
-        <textarea id="commentText"></textarea>
+        <textarea
+                id="commentText"
+                placeholder="Введите комментарий"
+        ></textarea>
 
         <button onclick="createCommentForEvent()">
             Отправить комментарий
@@ -94,9 +116,7 @@
 
                 <p>${comment.text}</p>
 
-                <p>
-                    ${comment.createdOn}
-                </p>
+                <p>${comment.createdOn}</p>
 
                 <button onclick="deleteCommentById(${comment.id})">
                     Удалить
@@ -110,7 +130,12 @@
     async function createCommentForEvent() {
 
         const text =
-            document.getElementById("commentText").value;
+            document.getElementById("commentText").value.trim();
+
+        if (!text) {
+            alert("Введите комментарий");
+            return;
+        }
 
         await createComment(eventId, text);
 
@@ -124,6 +149,21 @@
         await deleteComment(id);
 
         loadComments();
+    }
+
+    async function searchEvents() {
+
+        const text =
+            document.getElementById("searchText").value.trim();
+
+        // если пусто — отправляем null
+        const safeText =
+            text === "" ? null : text;
+
+        console.log("Поиск:", safeText);
+
+        // пример вызова
+        await getPublishedEvents(safeText);
     }
 
     loadEvent();

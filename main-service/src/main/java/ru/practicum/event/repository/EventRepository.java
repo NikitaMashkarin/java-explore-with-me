@@ -23,14 +23,14 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     Event findFirstByCategoryId(Long catId);
 
-    @Query(value = """
-            SELECT * FROM events e
-            WHERE (CAST(:users AS TEXT) IS NULL OR e.initiator_id IN (:users))
-            AND (CAST(:states AS TEXT) IS NULL OR e.state IN (:states))
-            AND (CAST(:categories AS TEXT) IS NULL OR e.category_id IN (:categories))
-            AND (CAST(:rangeStart AS TEXT) IS NULL OR e.event_date >= :rangeStart)
-            AND (CAST(:rangeEnd AS TEXT) IS NULL OR e.event_date <= :rangeEnd)
-            """, nativeQuery = true)
+    @Query("""
+       SELECT e FROM Event e
+       WHERE (:users IS NULL OR e.initiator.id IN :users)
+       AND (:states IS NULL OR e.state IN :states)
+       AND (:categories IS NULL OR e.category.id IN :categories)
+       AND (:rangeStart IS NULL OR e.eventDate >= :rangeStart)
+       AND (:rangeEnd IS NULL OR e.eventDate <= :rangeEnd)
+       """)
     List<Event> findEvents(
             @Param("users") List<Long> users,
             @Param("states") List<String> states,
@@ -39,23 +39,36 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             @Param("rangeEnd") LocalDateTime rangeEnd,
             Pageable pageable);
 
-    @Query(value = """
-            SELECT * FROM events e
-            WHERE e.state = 'PUBLISHED'
-              AND (:text IS NULL OR LOWER(e.annotation) LIKE LOWER(CONCAT('%', CAST(:text AS TEXT), '%'))
-                                  OR LOWER(e.description) LIKE LOWER(CONCAT('%', CAST(:text AS TEXT), '%')) )
-              AND (:categories IS NULL OR e.category_id IN (CAST(CAST(:categories AS TEXT) AS BIGINT)))
-              AND (:paid IS NULL OR e.paid = CAST(CAST(:paid AS TEXT) AS BOOLEAN))
-              AND (e.event_date >= :rangeStart)
-              AND (CAST(:rangeEnd AS timestamp) IS NULL OR e.event_date < CAST(:rangeEnd AS timestamp))
-            """,
-            nativeQuery = true)
-    List<Event> findPublishedEvents(@Param("text") String text,
-                                    @Param("categories") List<Long> categories,
-                                    @Param("paid") Boolean paid,
-                                    @Param("rangeStart") LocalDateTime rangeStart,
-                                    @Param("rangeEnd") LocalDateTime rangeEnd,
-                                    Pageable pageable);
+    @Query("""
+    SELECT e
+    FROM Event e
+    WHERE e.state = ru.practicum.event.model.EventState.PUBLISHED
+      AND (
+            :text IS NULL
+            OR LOWER(e.annotation) LIKE LOWER(CONCAT('%', :text, '%'))
+            OR LOWER(e.description) LIKE LOWER(CONCAT('%', :text, '%'))
+          )
+      AND (
+            :categories IS NULL
+            OR e.category.id IN :categories
+          )
+      AND (
+            :paid IS NULL
+            OR e.paid = :paid
+          )
+      AND e.eventDate >= :rangeStart
+      AND (
+            :rangeEnd IS NULL
+            OR e.eventDate < :rangeEnd
+          )
+""")
+    List<Event> findPublishedEvents(
+            String text,
+            List<Long> categories,
+            Boolean paid,
+            LocalDateTime rangeStart,
+            LocalDateTime rangeEnd,
+            Pageable pageable);
 
     boolean existsByCategoryId(Long categoryId);
 

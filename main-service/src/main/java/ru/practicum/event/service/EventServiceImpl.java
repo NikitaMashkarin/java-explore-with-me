@@ -77,9 +77,12 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventShortDto> getEvents(Long userId, int from, int size) {
-        userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
-        List<Event> events = eventRepository.findByInitiatorId(userId, PageRequest.of(from / size, size));
-        return events.stream().map(EventMapper::toEventShortDto).collect(Collectors.toList());
+//        userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+//        List<Event> events = eventRepository.findByInitiatorId(userId, PageRequest.of(from / size, size));
+//        return events.stream().map(EventMapper::toEventShortDto).collect(Collectors.toList());
+        return eventRepository.findAll().stream()
+                .map(EventMapper::toEventShortDto)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -200,25 +203,28 @@ public class EventServiceImpl implements EventService {
     public List<EventFullDto> getEventsByAdmin(List<Long> users, List<String> states,
                                                List<Long> categories, String rangeStart,
                                                String rangeEnd, int from, int size) {
-        LocalDateTime start = parseDateTime(rangeStart);
-        LocalDateTime end = parseDateTime(rangeEnd);
-
-        List<String> validStates = states != null ?
-                states.stream()
-                        .map(String::toUpperCase)
-                        .collect(Collectors.toList()) :
-                null;
-
-        List<Event> events = eventRepository.findEvents(
-                users,
-                validStates,
-                categories,
-                start,
-                end,
-                PageRequest.of(from / size, size)
-        );
-
-        return events.stream()
+//        LocalDateTime start = parseDateTime(rangeStart);
+//        LocalDateTime end = parseDateTime(rangeEnd);
+//
+//        List<String> validStates = states != null ?
+//                states.stream()
+//                        .map(String::toUpperCase)
+//                        .collect(Collectors.toList()) :
+//                null;
+//
+//        List<Event> events = eventRepository.findEvents(
+//                users,
+//                validStates,
+//                categories,
+//                start,
+//                end,
+//                PageRequest.of(from / size, size)
+//        );
+//
+//        return events.stream()
+//                .map(EventMapper::toEventFullDto)
+//                .collect(Collectors.toList());
+        return eventRepository.findAll().stream()
                 .map(EventMapper::toEventFullDto)
                 .collect(Collectors.toList());
     }
@@ -239,55 +245,58 @@ public class EventServiceImpl implements EventService {
                                                   String rangeStart, String rangeEnd, boolean onlyAvailable,
                                                   String sort, int from, int size, HttpServletRequest request) {
         sendHit(request);
-
-        LocalDateTime start = null;
-        LocalDateTime end = null;
-
-        try {
-            if (rangeStart != null) {
-                start = LocalDateTime.parse(rangeStart, formatter);
-            }
-            if (rangeEnd != null) {
-                end = LocalDateTime.parse(rangeEnd, formatter);
-            }
-        } catch (Exception e) {
-            throw new ValidationRequestException("Неверный формат даты. Ожидается: yyyy-MM-dd HH:mm:ss");
-        }
-
-        if (start != null && end != null && start.isAfter(end)) {
-            throw new ValidationRequestException("Дата начала должна быть раньше даты окончания.");
-        }
-
-        List<Event> events = eventRepository.findPublishedEvents(
-                text,
-                categories,
-                paid,
-                start != null ? start : LocalDateTime.now(),
-                end,
-                PageRequest.of(from / size, size)
-        );
-
-        if (onlyAvailable) {
-            events = events.stream()
-                    .filter(event -> EventMapper.countConfirmedRequests(event.getRequests()) < event.getParticipantLimit())
-                    .toList();
-        }
-
-        List<EventShortDto> dtos = events.stream()
+//
+//        LocalDateTime start = null;
+//        LocalDateTime end = null;
+//
+//        try {
+//            if (rangeStart != null) {
+//                start = LocalDateTime.parse(rangeStart, formatter);
+//            }
+//            if (rangeEnd != null) {
+//                end = LocalDateTime.parse(rangeEnd, formatter);
+//            }
+//        } catch (Exception e) {
+//            throw new ValidationRequestException("Неверный формат даты. Ожидается: yyyy-MM-dd HH:mm:ss");
+//        }
+//
+//        if (start != null && end != null && start.isAfter(end)) {
+//            throw new ValidationRequestException("Дата начала должна быть раньше даты окончания.");
+//        }
+//
+//        List<Event> events = eventRepository.findPublishedEvents(
+//                text,
+//                categories,
+//                paid,
+//                start != null ? start : LocalDateTime.now(),
+//                end,
+//                PageRequest.of(from / size, size)
+//        );
+//
+//        if (onlyAvailable) {
+//            events = events.stream()
+//                    .filter(event -> EventMapper.countConfirmedRequests(event.getRequests()) < event.getParticipantLimit())
+//                    .toList();
+//        }
+//
+//        List<EventShortDto> dtos = events.stream()
+//                .map(EventMapper::toEventShortDto)
+//                .collect(Collectors.toList());
+//
+//        if (sort != null) {
+//            if (sort.equals("EVENT_DATE")) {
+//                dtos.sort(Comparator.comparing(EventShortDto::getEventDate));
+//            } else if (sort.equals("VIEWS")) {
+//                dtos.sort(Comparator.comparing(EventShortDto::getViews));
+//            } else {
+//                throw new ValidationRequestException("Неверный параметр сортировки.");
+//            }
+//        }
+//
+//        return dtos;
+        return eventRepository.findAll().stream()
                 .map(EventMapper::toEventShortDto)
                 .collect(Collectors.toList());
-
-        if (sort != null) {
-            if (sort.equals("EVENT_DATE")) {
-                dtos.sort(Comparator.comparing(EventShortDto::getEventDate));
-            } else if (sort.equals("VIEWS")) {
-                dtos.sort(Comparator.comparing(EventShortDto::getViews));
-            } else {
-                throw new ValidationRequestException("Неверный параметр сортировки.");
-            }
-        }
-
-        return dtos;
     }
 
     @Override

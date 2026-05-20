@@ -34,6 +34,23 @@ public class AdminConfig {
 
                 System.out.println("ADMIN CREATED");
             }
+
+            if (userRepository.findByUsername("user").isEmpty()) {
+
+                User user = new User();
+
+                user.setName("Nikita");
+                user.setEmail("user@mail.ru");
+                user.setUsername("user");
+                user.setPassword(
+                        passwordEncoder.encode("user")
+                );
+                user.setRole("USER");
+
+                userRepository.save(user);
+
+                System.out.println("USER CREATED");
+            }
         };
     }
 }
